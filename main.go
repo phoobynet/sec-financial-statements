@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"github.com/phoobynet/sec-financial-statements/companies"
 	"github.com/phoobynet/sec-financial-statements/database"
 	"github.com/phoobynet/sec-financial-statements/quarterly"
@@ -15,6 +17,7 @@ import (
 func main() {
 	sourceZip := flag.String("z", "", "source zip file")
 	outPath := flag.String("o", "", "The output directory")
+	port := flag.Int("p", 3000, "The port to listen on")
 	flag.Parse()
 
 	if *outPath == "" {
@@ -46,4 +49,16 @@ func main() {
 	} else {
 		log.Printf("Database already exists at %s...starting server", dbPath)
 	}
+
+	// region web server
+	app := fiber.New()
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return c.SendString("Hello, World!")
+	})
+
+	app.Static("/", "./public")
+
+	log.Fatalln(app.Listen(fmt.Sprintf(":%d", *port)))
+	// endregion
 }

@@ -91,3 +91,5 @@ fabric.properties
 sec-financial-statements
 *.db
 *.sqlite
+
+public

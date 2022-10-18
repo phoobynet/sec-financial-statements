@@ -5,6 +5,7 @@ import (
 	"github.com/phoobynet/sec-financial-statements/nums"
 	"github.com/phoobynet/sec-financial-statements/pres"
 	"github.com/phoobynet/sec-financial-statements/sics"
+	"github.com/phoobynet/sec-financial-statements/subs"
 	"github.com/phoobynet/sec-financial-statements/tags"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -24,7 +25,7 @@ func Init(databasePath string) *gorm.DB {
 		log.Fatalln(openErr)
 	}
 
-	migrateErr := d.AutoMigrate(&submissions.Submission{}, &pres.Pre{}, &nums.Num{}, &tags.Tag{}, &companies.Company{}, &sics.SIC{})
+	migrateErr := d.AutoMigrate(&subs.Sub{}, &pres.Pre{}, &nums.Num{}, &tags.Tag{}, &companies.Company{}, &sics.SIC{})
 
 	if migrateErr != nil {
 		log.Fatalln(migrateErr)
