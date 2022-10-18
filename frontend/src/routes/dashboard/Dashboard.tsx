@@ -1,12 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAsync, useDebounce } from 'react-use'
 import { useCompanySearch } from '../../hooks/useCompanySearch'
+import { getQuery } from '../../database'
 
 export default function Dashboard () {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
   const { search, results, searching, hasResults } = useCompanySearch()
+
+  useEffect(() => {
+    void (async () => {
+      const q = await getQuery()
+      setQuery(q)
+    })()
+  }, [])
 
   useDebounce(() => {
     setDebouncedQuery(query)
@@ -47,7 +55,10 @@ export default function Dashboard () {
             </thead>
             <tbody>
             {results.map(r => (
-              <tr key={r.cik} className={'hover'}>
+              <tr
+                key={r.cik}
+                className={'hover'}
+              >
                 <td>{r.cik}</td>
                 <td className={'font-bold'}>{r.symbol}</td>
                 <td>{r.name}</td>
