@@ -1,10 +1,5 @@
 package submissions
 
-import (
-	"reflect"
-	"strings"
-)
-
 // Submission data set; this includes one record for each XBRL submission. The set includes fields of information pertinent to the submission and the filing entity. Information is extracted from the SEC’s EDGAR system and the filings submitted to the SEC by registrants.
 
 // Submission is a single submission to the SEC
@@ -35,6 +30,7 @@ type Submission struct {
 	WKSI       string `gorm:"column:wksi"`
 	FYE        string `gorm:"column:fye"`
 	Form       string `gorm:"column:form"`
+	Period     string `gorm:"column:period"`
 	FY         string `gorm:"column:fy"`
 	FP         string `gorm:"column:fp"`
 	Filed      string `gorm:"column:filed"`
@@ -44,17 +40,4 @@ type Submission struct {
 	Instance   string `gorm:"column:instance"`
 	NCIKS      string `gorm:"column:nciks"`
 	ACIKS      string `gorm:"column:aciks"`
-}
-
-var submissionType = reflect.TypeOf(Submission{})
-
-func NewSubmission(line string) *Submission {
-	tokens := strings.Split(line, "\t")
-	v := reflect.New(submissionType)
-	vElem := v.Elem()
-	for i := 0; i < submissionType.NumField(); i++ {
-		vElem.Field(i).SetString(tokens[i])
-	}
-
-	return v.Interface().(*Submission)
 }

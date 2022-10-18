@@ -3,6 +3,7 @@ package utils
 import (
 	"archive/zip"
 	"bufio"
+	"fmt"
 	"gorm.io/gorm"
 	"io"
 	"log"
@@ -25,7 +26,7 @@ func ProcessFile[T any](db *gorm.DB, file *zip.File, create func(line string) *T
 
 	header := true
 
-	rowBuffer := make([]interface{}, 0, 100)
+	fmt.Printf("Processing %s\n", file.Name)
 
 	counter := 0
 
@@ -37,19 +38,15 @@ func ProcessFile[T any](db *gorm.DB, file *zip.File, create func(line string) *T
 
 		row := create(scanner.Text())
 
-		rowBuffer = append(rowBuffer, row)
+		rowErr := db.Create(row).Error
 
-		if len(rowBuffer) == 100 {
-			db.Create(rowBuffer)
-			rowBuffer = rowBuffer[:0]
-			counter += 100
-			log.Printf("%s processed: %10d\n", t.Name(), counter)
+		if rowErr != nil {
+			log.Fatalf("%s error inserting buffer: %v", t.Name(), rowErr)
 		}
-	}
+		counter++
 
-	if len(rowBuffer) > 0 {
-		db.Create(rowBuffer)
-		counter += len(rowBuffer)
-		log.Printf("%s processed: %10d\n", t.Name(), counter)
+		if counter%1000 == 0 {
+			fmt.Printf("Processed %d rows\n", counter)
+		}
 	}
 }
