@@ -4,9 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/phoobynet/sec-financial-statements/companies"
 	"github.com/phoobynet/sec-financial-statements/database"
 	"github.com/phoobynet/sec-financial-statements/quarterly"
+	"github.com/phoobynet/sec-financial-statements/queries"
 	"github.com/phoobynet/sec-financial-statements/sics"
 	"log"
 	"os"
@@ -47,14 +49,27 @@ func main() {
 		quarterly.Load(db, *sourceZip)
 		database.CreateIndexes(db)
 	} else {
+		database.Init(dbPath)
 		log.Printf("Database already exists at %s...starting server", dbPath)
 	}
 
 	// region web server
 	app := fiber.New()
+	app.Use(cors.New())
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
+	app.Get("/api/search", func(c *fiber.Ctx) error {
+		query := c.Query("q")
+		if query == "" {
+			return c.SendStatus(fiber.StatusBadRequest)
+		}
+
+		searchResults := queries.SearchForCompanies(query)
+
+		return c.JSON(searchResults)
+	})
+
+	app.Get("/api/companies", func(c *fiber.Ctx) error {
+		return c.JSON(queries.GetAllCompanies())
 	})
 
 	app.Static("/", "./public")
