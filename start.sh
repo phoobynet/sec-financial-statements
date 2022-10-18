@@ -2,4 +2,4 @@
 
 go build
 
-./sec-financial-statements -s /Volumes/raid/Downloads/browser/2022q3.zip -d /Volumes/yotta_1tb/sec_data/quarterly_reports.db
+./sec-financial-statements -z /Volumes/raid/Downloads/browser/2022q3.zip -o /Volumes/yotta_1tb/sec_data

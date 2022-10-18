@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/phoobynet/sec-financial-statements/companies"
 	"github.com/phoobynet/sec-financial-statements/nums"
 	"github.com/phoobynet/sec-financial-statements/pres"
 	"github.com/phoobynet/sec-financial-statements/submissions"
@@ -23,7 +24,7 @@ func Init(databasePath string) *gorm.DB {
 		log.Fatalln(openErr)
 	}
 
-	migrateErr := d.AutoMigrate(&submissions.Submission{}, &pres.Pre{}, &nums.Num{}, &tags.Tag{})
+	migrateErr := d.AutoMigrate(&submissions.Submission{}, &pres.Pre{}, &nums.Num{}, &tags.Tag{}, &companies.Company{})
 
 	if migrateErr != nil {
 		log.Fatalln(migrateErr)
