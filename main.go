@@ -3,18 +3,22 @@ package main
 import (
 	"archive/zip"
 	"flag"
+	"fmt"
 	tickers "github.com/phoobynet/sec-company-tickers"
 	"github.com/phoobynet/sec-financial-statements/companies"
 	"github.com/phoobynet/sec-financial-statements/database"
 	. "github.com/phoobynet/sec-financial-statements/nums"
 	. "github.com/phoobynet/sec-financial-statements/pres"
+	"github.com/phoobynet/sec-financial-statements/sics"
 	. "github.com/phoobynet/sec-financial-statements/submissions"
 	. "github.com/phoobynet/sec-financial-statements/tags"
 	. "github.com/phoobynet/sec-financial-statements/utils"
+	sicScraper "github.com/phoobynet/sec-sic-scraper"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -36,13 +40,61 @@ func main() {
 
 	zipFileStat.Name()
 
-	dbPath := filepath.Join(*outPath, zipFileStat.Name()+".db")
+	dbPath := filepath.Join(*outPath, strings.TrimSuffix(zipFileStat.Name(), ".zip")+".db")
 
 	if _, err := os.Stat(dbPath); !os.IsNotExist(err) {
 		log.Fatalln("Database already exists")
 	}
 
+	fmt.Printf("Database path: %s\n", dbPath)
+
 	db := database.Init(dbPath)
+
+	log.Printf("Loading SIC codes...")
+	s, err := sicScraper.Get(nil)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	for _, item := range s {
+		sicErr := db.Create(&sics.SIC{
+			Code:          strconv.Itoa(item.Code),
+			IndustryTitle: item.IndustryTitle,
+			Office:        item.Office,
+		}).Error
+
+		if sicErr != nil {
+			log.Fatalln(sicErr)
+		}
+	}
+
+	log.Printf("Loading SIC codes...done")
+
+	log.Printf("Loading companies...")
+
+	companyTickers, companyTickersErr := tickers.Get(nil)
+
+	if companyTickersErr != nil {
+		log.Fatalln("Failed to retrieve tickers from the SEC")
+	}
+
+	for _, companyTicker := range companyTickers {
+		cik := strconv.Itoa(companyTicker.CIK)
+
+		company := &companies.Company{
+			CIK:      cik,
+			Name:     companyTicker.Name,
+			Symbol:   companyTicker.Symbol,
+			Exchange: companyTicker.Exchange,
+		}
+
+		companyErr := db.Create(company).Error
+
+		if companyErr != nil {
+			log.Fatalln("Failed to create company", companyErr)
+		}
+	}
 
 	finStatementZip, migrateErr := zip.OpenReader(*sourceZip)
 
@@ -68,31 +120,6 @@ func main() {
 			ProcessFile[Tag](db, file, func(line string) *Tag {
 				return ProcessLine[Tag](line)
 			})
-		}
-	}
-
-	log.Printf("Loading companies...")
-
-	companyTickers, companyTickersErr := tickers.Get(nil)
-
-	if companyTickersErr != nil {
-		log.Fatalln("Failed to retrieve tickers from the SEC")
-	}
-
-	for _, companyTicker := range companyTickers {
-		cik := strconv.Itoa(companyTicker.CIK)
-
-		company := &companies.Company{
-			CIK:      cik,
-			Name:     companyTicker.Name,
-			Symbol:   companyTicker.Symbol,
-			Exchange: companyTicker.Exchange,
-		}
-
-		companyErr := db.Create(company).Error
-
-		if companyErr != nil {
-			log.Fatalln("Failed to create company", companyErr)
 		}
 	}
 
@@ -122,5 +149,4 @@ func main() {
 	db.Exec("CREATE INDEX IF NOT EXISTS idx_pres_adsh_tag_version ON pres (adsh,tag, version)")
 
 	log.Printf("Creating indexes...done")
-
 }
