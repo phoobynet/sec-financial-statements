@@ -1,9 +1,9 @@
-package submissions
+package subs
 
 // Submission data set; this includes one record for each XBRL submission. The set includes fields of information pertinent to the submission and the filing entity. Information is extracted from the SEC’s EDGAR system and the filings submitted to the SEC by registrants.
 
-// Submission is a single submission to the SEC
-type Submission struct {
+// Sub is a single submission to the SEC
+type Sub struct {
 	ADSH       string `gorm:"column:adsh"`
 	CIK        string `gorm:"column:cik"`
 	Name       string `gorm:"column:name"`

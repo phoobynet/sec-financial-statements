@@ -5,7 +5,6 @@ import (
 	"github.com/phoobynet/sec-financial-statements/nums"
 	"github.com/phoobynet/sec-financial-statements/pres"
 	"github.com/phoobynet/sec-financial-statements/sics"
-	"github.com/phoobynet/sec-financial-statements/submissions"
 	"github.com/phoobynet/sec-financial-statements/tags"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

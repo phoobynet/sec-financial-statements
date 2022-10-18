@@ -7,12 +7,11 @@ import (
 	tickers "github.com/phoobynet/sec-company-tickers"
 	"github.com/phoobynet/sec-financial-statements/companies"
 	"github.com/phoobynet/sec-financial-statements/database"
-	. "github.com/phoobynet/sec-financial-statements/nums"
-	. "github.com/phoobynet/sec-financial-statements/pres"
+	"github.com/phoobynet/sec-financial-statements/nums"
+	"github.com/phoobynet/sec-financial-statements/pres"
 	"github.com/phoobynet/sec-financial-statements/sics"
-	. "github.com/phoobynet/sec-financial-statements/submissions"
-	. "github.com/phoobynet/sec-financial-statements/tags"
-	. "github.com/phoobynet/sec-financial-statements/utils"
+	"github.com/phoobynet/sec-financial-statements/subs"
+	"github.com/phoobynet/sec-financial-statements/tags"
 	sicScraper "github.com/phoobynet/sec-sic-scraper"
 	"log"
 	"os"
@@ -105,21 +104,13 @@ func main() {
 	for _, file := range finStatementZip.File {
 		switch file.Name {
 		case "sub.txt":
-			ProcessFile[Submission](db, file, func(line string) *Submission {
-				return ProcessLine[Submission](line)
-			})
+			subs.Load(db, file)
 		case "num.txt":
-			ProcessFile[Num](db, file, func(line string) *Num {
-				return ProcessLine[Num](line)
-			})
+			nums.Load(db, file)
 		case "pre.txt":
-			ProcessFile[Pre](db, file, func(line string) *Pre {
-				return ProcessLine[Pre](line)
-			})
+			pres.Load(db, file)
 		case "tag.txt":
-			ProcessFile[Tag](db, file, func(line string) *Tag {
-				return ProcessLine[Tag](line)
-			})
+			tags.Load(db, file)
 		}
 	}
 
