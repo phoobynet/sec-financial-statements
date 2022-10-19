@@ -8,6 +8,7 @@ import (
 )
 
 func Load(db *gorm.DB) {
+	tx := db.Begin()
 	log.Printf("Loading companies...")
 
 	companyTickers, companyTickersErr := tickers.Get(nil)
@@ -26,11 +27,13 @@ func Load(db *gorm.DB) {
 			Exchange: companyTicker.Exchange,
 		}
 
-		companyErr := db.Create(company).Error
+		companyErr := tx.Create(company).Error
 
 		if companyErr != nil {
 			log.Fatalln("Failed to create company", companyErr)
 		}
 	}
+
+	tx.Commit()
 
 }

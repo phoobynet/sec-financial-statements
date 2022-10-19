@@ -34,7 +34,7 @@ func Init(databasePath string) *gorm.DB {
 		log.Fatalln(migrateErr)
 	}
 
-	d.Exec("PRAGMA journal_mode=OFF;PRAGMA synchronous=OFF;PRAGMA cache_size=100000;PRAGMA locking_mode=EXCLUSIVE;")
+	d.Exec("PRAGMA cache_size = 400000; PRAGMA synchronous = OFF; PRAGMA journal_mode = OFF; PRAGMA locking_mode = EXCLUSIVE; PRAGMA count_changes = OFF; PRAGMA temp_store = MEMORY; PRAGMA auto_vacuum = NONE;")
 
 	db = d
 

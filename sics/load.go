@@ -8,6 +8,7 @@ import (
 )
 
 func Load(db *gorm.DB) {
+	tx := db.Begin()
 	log.Printf("Loading SIC codes...")
 	s, err := sicScraper.Get(nil)
 
@@ -16,7 +17,7 @@ func Load(db *gorm.DB) {
 	}
 
 	for _, item := range s {
-		sicErr := db.Create(&SIC{
+		sicErr := tx.Create(&SIC{
 			Code:          strconv.Itoa(item.Code),
 			IndustryTitle: item.IndustryTitle,
 			Office:        item.Office,
@@ -26,6 +27,8 @@ func Load(db *gorm.DB) {
 			log.Fatalln(sicErr)
 		}
 	}
+
+	tx.Commit()
 
 	log.Printf("Loading SIC codes...done")
 }

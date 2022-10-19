@@ -7,7 +7,11 @@ import (
 )
 
 func Load(db *gorm.DB, f *zip.File) {
-	ProcessFile[Sub](db, f, func(line string) *Sub {
+	tx := db.Begin()
+
+	ProcessFile[Sub](tx, f, func(line string) *Sub {
 		return ProcessLine[Sub](line)
 	})
+
+	tx.Commit()
 }
