@@ -9,6 +9,7 @@ import (
 	"github.com/phoobynet/sec-financial-statements/tags"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"log"
 )
 
@@ -19,6 +20,8 @@ func Init(databasePath string) *gorm.DB {
 
 	d, openErr := gorm.Open(sqlite.Open(databasePath), &gorm.Config{
 		SkipDefaultTransaction: true,
+		Logger:                 logger.Default.LogMode(logger.Silent),
+		PrepareStmt:            true,
 	})
 
 	if openErr != nil {
@@ -30,6 +33,8 @@ func Init(databasePath string) *gorm.DB {
 	if migrateErr != nil {
 		log.Fatalln(migrateErr)
 	}
+
+	d.Exec("PRAGMA journal_mode=OFF;PRAGMA synchronous=OFF;PRAGMA cache_size=100000;PRAGMA locking_mode=EXCLUSIVE;")
 
 	db = d
 
