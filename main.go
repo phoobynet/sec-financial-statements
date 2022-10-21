@@ -7,7 +7,6 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/phoobynet/sec-financial-statements/companies"
 	"github.com/phoobynet/sec-financial-statements/database"
-	"github.com/phoobynet/sec-financial-statements/quarterly"
 	"github.com/phoobynet/sec-financial-statements/queries"
 	"github.com/phoobynet/sec-financial-statements/sics"
 	"log"
@@ -46,7 +45,10 @@ func main() {
 		db := database.Init(dbPath)
 		sics.Load(db)
 		companies.Load(db)
-		quarterly.Load(db, *sourceZip)
+
+		// load subs directly from the zip file
+
+		//quarterly.Load(db, *sourceZip)
 		database.CreateIndexes(db)
 	} else {
 		database.Init(dbPath)
